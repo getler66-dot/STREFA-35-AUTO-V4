@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Strefa 35 Auto V4">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="screen-orientation" content="any">
+<title>Strefa 35 Auto V4</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; min-height: 100dvh; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .header { padding: 8px 16px; }
+  .header h1 { font-size: 17px; }
+  .toolbar { padding: 6px 12px; gap: 6px; }
+  .btn { height: 32px; font-size: 12px; padding: 0 10px; }
+  .counter-bar { padding: 6px 12px; }
+  .counter-box-val { font-size: 20px; }
+}
+.header { padding: 12px 16px 10px; background: #1a1a1a; border-bottom: 0.5px solid #2a2a2a; }
+.header-greet { font-size: 13px; color: #888; margin-bottom: 2px; }
+.header h1 { font-size: 20px; font-weight: 600; color: #fff; }
+.toolbar { padding: 10px 16px; background: #141414; border-bottom: 0.5px solid #2a2a2a; display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: none; border-radius: 8px; padding: 0 14px; height: 36px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-primary { background: #1a6edb; color: #fff; }
+.btn-green { background: #0d3a1a; color: #4cd966; border: 0.5px solid #1a5c2a; }
+.btn-danger { background: #2a1010; color: #ff5555; border: 0.5px solid #5a2020; }
+.btn-orange { background: #2a1a00; color: #FFAA33; border: 0.5px solid #5a3a00; }
+.btn-purple { background: #1a0a2a; color: #CC66FF; border: 0.5px solid #4a1a6a; }
+.btn-undo { background: #1a1a2a; color: #aaa; border: 0.5px solid #333; }
+.btn-undo:disabled { color: #333; border-color: #222; cursor: default; }
+.btn-export { background: #0d3a2a; color: #4cd9aa; border: 0.5px solid #1a5c3a; }
+.input-area { padding: 12px 16px; background: #141414; border-bottom: 0.5px solid #2a2a2a; display: none; }
+.input-area.open { display: block; }
+.input-area textarea { width: 100%; height: 150px; background: #222; border: 0.5px solid #333; border-radius: 8px; color: #e0e0e0; padding: 10px; font-size: 13px; resize: none; }
+.input-actions { display: flex; gap: 8px; margin-top: 10px; }
+.add-area { padding: 12px 16px; background: #141414; border-bottom: 0.5px solid #2a2a2a; display: none; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.add-area.open { display: flex; }
+.add-field { display: flex; flex-direction: column; gap: 4px; }
+.add-label { font-size: 11px; color: #888; }
+.add-input { height: 36px; border-radius: 8px; border: 0.5px solid #333; background: #222; color: #e0e0e0; padding: 0 10px; font-size: 13px; }
+.counter-bar { padding: 10px 16px; background: #141414; border-bottom: 0.5px solid #2a2a2a; display: flex; gap: 10px; }
+.counter-box { flex: 1; background: #1e1e1e; border-radius: 10px; border: 0.5px solid #2a2a2a; padding: 10px 12px; display: flex; flex-direction: column; align-items: center; }
+.counter-box-val { font-size: 24px; font-weight: 800; color: #4cd966; line-height: 1; }
+.counter-box-val.low { color: #f0a500; }
+.counter-box-val.zero { color: #ff5555; }
+.counter-box-lbl { font-size: 10px; color: #666; margin-top: 4px; text-align: center; }
+.stats { padding: 8px 16px; display: flex; gap: 6px; background: #141414; border-bottom: 0.5px solid #2a2a2a; }
+.stat { flex: 1; background: #1e1e1e; border-radius: 10px; border: 0.5px solid #2a2a2a; padding: 8px 6px; text-align: center; }
+.stat-val { font-size: 17px; font-weight: 700; color: #fff; }
+.stat-lbl { font-size: 9px; color: #666; margin-top: 1px; }
+.warn-bar { padding: 8px 16px; background: #2a1500; border-bottom: 0.5px solid #5a3000; font-size: 12px; color: #FFAA33; display: none; }
+.warn-bar.show { display: block; }
+.swap-mode-bar { padding: 10px 16px; background: #0a1a2a; border-bottom: 0.5px solid #1a3a5a; display: none; align-items: center; justify-content: space-between; }
+.swap-mode-bar.show { display: flex; }
+.swap-mode-info { font-size: 13px; color: #4488FF; font-weight: 500; }
+.swap-mode-sub { font-size: 11px; color: #555; margin-top: 2px; }
+.btn-cancel-swap { background: #1a1a1a; border: 0.5px solid #333; border-radius: 8px; color: #aaa; font-size: 12px; padding: 0 12px; height: 30px; cursor: pointer; }
+.hint-bar { font-size: 11px; color: #555; text-align: center; padding: 6px 0 2px; display: none; }
+.hint-bar.show { display: block; }
+.art-list { padding: 10px 16px 24px; }
+.art-card { background: #1e1e1e; border: 0.5px solid #2a2a2a; border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.15s, background 0.15s; }
+.art-card.assigned { border-color: #1a5c1a; }
+.art-card.no-slot { border-color: #5a1a1a; }
+.art-card.swap-selected { border-color: #4488FF; background: #0a1525; border-width: 2px; }
+.art-card.swap-target { border-color: #4488FF; background: #050d1a; border-style: dashed; }
+.art-top { padding: 12px 14px 8px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.art-nr { font-size: 20px; font-weight: 800; color: #444; min-width: 28px; flex-shrink: 0; padding-top: 2px; }
+.art-nr.selected { color: #4488FF; }
+.art-info { flex: 1; min-width: 0; }
+.art-name { font-size: 13px; font-weight: 600; color: #e0e0e0; line-height: 1.3; margin-bottom: 3px; }
+.art-code { font-size: 11px; color: #666; }
+.art-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.ep-input { width: 48px; height: 34px; background: #111; border: 1.5px solid #5a3a00; border-radius: 8px; color: #FFAA33; font-size: 15px; font-weight: 700; text-align: center; padding: 0; }
+.ep-input:focus { outline: none; border-color: #FFAA33; }
+.ep-label { font-size: 9px; color: #555; }
+.btn-del-art { background: none; border: none; color: #333; font-size: 15px; cursor: pointer; padding: 2px; }
+.btn-del-art:active { color: #ff5555; }
+.art-bottom { padding: 0 14px 10px; display: flex; gap: 8px; align-items: center; }
+.gn-badge { background: #0a1a3a; border: 0.5px solid #1a3a7a; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #4488FF; }
+.slots-badge { font-size: 11px; color: #555; }
+.no-slot-badge { font-size: 12px; color: #ff5555; }
+/* Eksport */
+.export-section { display: none; padding: 12px 16px 24px; }
+.export-section.show { display: block; }
+.export-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.export-title { font-size: 14px; font-weight: 600; color: #4cd9aa; }
+.btn-copy-export { background: #0d3a2a; border: 0.5px solid #1a5c3a; border-radius: 8px; color: #4cd9aa; font-size: 13px; font-weight: 600; padding: 0 14px; height: 32px; cursor: pointer; }
+.btn-copy-export.copied { background: #0d3a1a; color: #4cd966; }
+.export-text { background: #111; border: 0.5px solid #2a2a2a; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #ccc; line-height: 1.45; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; user-select: text; -webkit-user-select: text; cursor: text; }
+.exp-item { padding: 10px 0; border-bottom: 0.5px solid #222; }
+.exp-item:last-child { border-bottom: none; }
+.exp-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 3px; }
+.exp-gn { color: #4488FF; font-weight: 700; font-size: 14px; }
+.exp-art { color: #aaa; font-size: 12px; }
+.exp-ep { color: #FFAA33; font-weight: 700; font-size: 13px; }
+.exp-ep.full { color: #4cd966; }
+.exp-zr { color: #888; font-size: 12px; }
+.exp-name { color: #e0e0e0; font-size: 13px; font-weight: 500; }
+.exp-noslot-title { color: #ff5555; font-weight: 600; font-size: 12px; margin: 12px 0 6px; padding-top: 8px; border-top: 0.5px solid #333; }
+.lock-section { display: none; padding: 10px 16px 16px; border-top: 0.5px solid #2a2a2a; }
+.lock-section.open { display: block; }
+.lock-title { font-size: 13px; color: #888; font-weight: 600; margin-bottom: 8px; }
+.lock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.lock-btn { background: #1e1e1e; border: 0.5px solid #2a2a2a; border-radius: 8px; padding: 8px 4px; text-align: center; font-size: 11px; color: #888; cursor: pointer; font-weight: 500; }
+.lock-btn.locked { background: #1a0808; border-color: #5a1a1a; color: #ff5555; }
+.empty { text-align: center; padding: 48px 16px; color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-greet">👋 Cześć Beata</div>
+  <h1>Strefa 35 — Auto V4</h1>
+</div>
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="toggleInput()">+ Lista</button>
+  <button class="btn btn-purple" onclick="toggleAdd()">+ Artykuł</button>
+  <button class="btn btn-undo" id="btn-undo" onclick="undo()" disabled>↩ Cofnij</button>
+  <button class="btn btn-green" onclick="assignAll()">▶ Przypisz</button>
+  <button class="btn btn-export" id="btn-export" style="display:none" onclick="toggleExport()">📋 Lista</button>
+  <button class="btn btn-orange" onclick="toggleLocks()">🔒 Blokady</button>
+  <button class="btn btn-danger" onclick="clearAll()">↺ Reset</button>
+</div>
+<div class="input-area" id="input-area">
+  <textarea id="inp-list" placeholder="Wklej listę..."></textarea>
+  <div class="input-actions">
+    <button class="btn btn-primary" onclick="parseList()">Wczytaj</button>
+    <button class="btn btn-danger" onclick="document.getElementById('inp-list').value=''">Wyczyść</button>
+  </div>
+</div>
+<div class="add-area" id="add-area">
+  <div class="add-field"><div class="add-label">Nr artykułu</div><input class="add-input" id="add-art" type="text" placeholder="np. 5575089" style="width:110px"></div>
+  <div class="add-field" style="flex:1;min-width:120px"><div class="add-label">Nazwa</div><input class="add-input" id="add-name" type="text" placeholder="Nazwa produktu" style="width:100%"></div>
+  <div class="add-field"><div class="add-label">EP</div><input class="add-input" id="add-ep" type="number" min="1" placeholder="1" style="width:60px"></div>
+  <button class="btn btn-purple" onclick="addItem()" style="align-self:flex-end">Dodaj</button>
+</div>
+<div class="counter-bar">
+  <div class="counter-box">
+    <div class="counter-box-val" id="cnt-total">—</div>
+    <div class="counter-box-lbl">EP w przydziale</div>
+  </div>
+  <div class="counter-box" id="cnt-outside-box" style="display:none">
+    <div class="counter-box-val" id="cnt-outside">—</div>
+    <div class="counter-box-lbl">poza gniazdami</div>
+  </div>
+</div>
+<div class="stats" id="stats" style="display:none">
+  <div class="stat"><div class="stat-val" id="st-art">0</div><div class="stat-lbl">Artykułów</div></div>
+  <div class="stat"><div class="stat-val" id="st-ep">0</div><div class="stat-lbl">EP łącznie</div></div>
+  <div class="stat"><div class="stat-val" id="st-free">44</div><div class="stat-lbl">Wolne gn.</div></div>
+  <div class="stat"><div class="stat-val" id="st-used">—</div><div class="stat-lbl">Zajęte gn.</div></div>
+</div>
+<div class="warn-bar" id="warn-bar"></div>
+<div class="swap-mode-bar" id="swap-mode-bar">
+  <div>
+    <div class="swap-mode-info">🔄 Wybrano — tap na drugi artykuł żeby zamienić</div>
+    <div class="swap-mode-sub">Tap na ten sam = odznacz</div>
+  </div>
+  <button class="btn-cancel-swap" onclick="cancelSwap()">Anuluj</button>
+</div>
+<div class="hint-bar" id="hint-bar">Tap na kafelek → zaznacz · Tap na drugi → zamień miejscami</div>
+<div id="main-content"><div class="empty">Wgraj listę i kliknij "▶ Przypisz"</div></div>
+
+<!-- Eksport po przypisaniu -->
+<div class="export-section" id="export-section">
+  <div class="export-head">
+    <div class="export-title">📋 Podsumowanie przydziału</div>
+    <button class="btn-copy-export" id="btn-copy-exp" onclick="copyExport()">Kopiuj</button>
+  </div>
+  <div class="export-text" id="export-text"></div>
+</div>
+
+<div class="lock-section" id="lock-section">
+  <div class="lock-title">🔒 Blokady — tap żeby zablokować</div>
+  <div class="lock-grid" id="lock-grid"></div>
+</div>
+
+<script>
+const ALL_SLOTS=["35-003","35-005","35-017","35-019","35-021","35-023","35-025","35-027","35-039","35-041","35-043","35-045","35-047","35-049","35-061","35-063","35-065","35-067","35-069","35-071","35-083","35-085","35-087","35-089","35-091","35-093","35-105","35-107","35-109","35-111","35-113","35-115","35-127","35-129","35-131","35-133","35-135","35-137","35-149","35-151","35-153","35-155","35-157","35-159"];
+function loadBlocked(){try{const s=localStorage.getItem('s35auto_blocked');return s?JSON.parse(s):[]}catch(e){return[]}}
+function saveBlocked(){try{localStorage.setItem('s35auto_blocked',JSON.stringify(blocked))}catch(e){}}
+let blocked=loadBlocked(),items=[],assigned=false,idCounter=0,selectedId=null;
+let history=[];// Stack historii do cofania
+
+function saveHistory(){history.push(JSON.stringify({items,assigned}));if(history.length>20)history.shift();document.getElementById('btn-undo').disabled=false;}
+function undo(){
+  if(history.length===0)return;
+  const prev=JSON.parse(history.pop());
+  items=prev.items;assigned=prev.assigned;selectedId=null;
+  document.getElementById('btn-undo').disabled=history.length===0;
+  render();
+}
+
+function toggleInput(){document.getElementById('input-area').classList.toggle('open');document.getElementById('add-area').classList.remove('open');}
+function toggleAdd(){document.getElementById('add-area').classList.toggle('open');document.getElementById('input-area').classList.remove('open');}
+function parseEp(str){if(!str)return null;const m=str.match(/(\d+)\s*(ep|palet[ay]?)/i);return m?parseInt(m[1]):null;}
+
+function parseList(){
+  const raw=document.getElementById('inp-list').value.trim();if(!raw)return;
+  const lines=raw.split('\n').filter(l=>l.trim());const parsed=[];
+  lines.forEach((line)=>{
+    line=line.trim().replace(/^\d+[\.\)]\s*/,'');
+    if(!line)return;
+
+    // 1. Numer artykułu: "Art. 1800310"
+    let art=null;
+    const artMatch=line.match(/Art\.?\s*(\d{4,})/i);
+    if(artMatch){
+      art=artMatch[1];
+      line=line.replace(/Art\.?\s*\d{4,}/i,'').trim();
+    }
+
+    // 2. EP / palet
+    let ep=null;
+    const epMatch=line.match(/(\d+)\s*(ep|palet[ay]?)/i);
+    if(epMatch){
+      ep=parseInt(epMatch[1]);
+      line=line.replace(/[–\-]?\s*\d+\s*(ep|palet[ay]?).*$/i,'').trim();
+    }
+
+    // 3. Czyszczenie resztek (karty, ukośniki, fa.)
+    line=line.replace(/[–\-]\s*\d+\s*kart\.?.*$/i,'').trim();
+    line=line.replace(/\bfa\.\s*/gi,'').trim();
+    line=line.replace(/\/\s*$/,'').trim();
+    line=line.replace(/[–\-]\s*$/,'').trim();
+
+    // 4. Gniazdo źródłowe (np. 33-210, 30-167)
+    let zrodlo=null;
+    const zrodloMatch=line.match(/^(\d{2}-\d{3})\b/);
+    if(zrodloMatch){
+      zrodlo=zrodloMatch[1];
+      line=line.replace(/^\d{2}-\d{3}\s*[–\-]?\s*/,'').trim();
+    }
+
+    // 5. Jeśli nie ma "Art." — bierzemy pierwszy człon jako art (czysty format)
+    if(!art){
+      const parts=line.split(/\s*[–\-]\s*/);
+      if(parts.length>=2){
+        art=parts[0].trim();
+        line=parts.slice(1).join(' – ').trim();
+      }else{
+        art='—';
+      }
+    }
+
+    // 6. Reszta = nazwa
+    let name=line.replace(/^[–\-\s]+/,'').replace(/[–\-\s]+$/,'').trim();
+
+    if(name){
+      parsed.push({id:++idCounter,art:art||'—',name,zrodlo:zrodlo||null,maxEp:ep,ep:ep||1,gniazdo:null,slots:[]});
+    }
+  });
+  if(parsed.length>0){
+    saveHistory();items=parsed;assigned=false;selectedId=null;renumber();
+    document.getElementById('input-area').classList.remove('open');
+    document.getElementById('inp-list').value='';
+    render();
+  }
+}
+
+function addItem(){
+  const art=document.getElementById('add-art').value.trim();const name=document.getElementById('add-name').value.trim();const ep=parseInt(document.getElementById('add-ep').value)||1;
+  if(!name)return;saveHistory();items.push({id:++idCounter,art:art||'—',name,zrodlo:null,maxEp:ep,ep,gniazdo:null,slots:[]});renumber();
+  document.getElementById('add-art').value='';document.getElementById('add-name').value='';document.getElementById('add-ep').value='';
+  if(assigned)assignAll();else render();
+}
+
+function deleteItem(id){saveHistory();items=items.filter(i=>i.id!==id);if(selectedId===id)selectedId=null;renumber();if(assigned)assignAll();else render();}
+function renumber(){items.forEach((it,i)=>it.nr=i+1);}
+
+function handleCardTap(id){
+  if(assigned)return;
+  if(selectedId===null){selectedId=id;render();}
+  else if(selectedId===id){cancelSwap();}
+  else{saveHistory();const i1=items.findIndex(i=>i.id===selectedId);const i2=items.findIndex(i=>i.id===id);
+    if(i1!==-1&&i2!==-1){const tmp=items[i1];items[i1]=items[i2];items[i2]=tmp;renumber();}
+    selectedId=null;render();}
+}
+function cancelSwap(){selectedId=null;render();}
+
+function getTotalEpFromList(){return items.reduce((s,i)=>s+(parseInt(i.maxEp)||parseInt(i.ep)||0),0);}
+function getEpInSlots(){return items.reduce((s,i)=>s+(i.slots?i.slots.length:0),0);}
+
+function updateCounter(){
+  const t=getTotalEpFromList();document.getElementById('cnt-total').textContent=t>0?t:'—';
+  const ob=document.getElementById('cnt-outside-box');const oe=document.getElementById('cnt-outside');
+  if(assigned){const left=t-getEpInSlots();ob.style.display='';oe.textContent=left<0?0:left;oe.className='counter-box-val'+(left<=0?' zero':left<=5?' low':'');}
+  else ob.style.display='none';
+}
+
+function freeSlots(){return ALL_SLOTS.filter(s=>!blocked.includes(s));}
+
+function assignAll(){
+  if(items.length===0)return;saveHistory();
+  // Upewnij się, że maxEp jest ustawione
+  items.forEach(item=>{
+    if(!item.maxEp||item.maxEp<item.ep) item.maxEp=item.ep;
+    // Resetujemy ep do maxEp — potem ewentualnie ściśniemy
+    item.ep=parseInt(item.maxEp)||1;
+  });
+  const free=freeSlots();
+  let totalDesired=items.reduce((s,i)=>s+(parseInt(i.maxEp)||1),0);
+
+  // Jeśli nie mieści się — rozdziel proporcjonalnie względem maxEp
+  if(totalDesired>free.length){
+    const ratio=free.length/totalDesired;
+    items.forEach(item=>{
+      item.ep=Math.max(1,Math.round((parseInt(item.maxEp)||1)*ratio));
+    });
+    // Doprecyzuj różnicę (zaokrąglenia)
+    let diff=items.reduce((s,i)=>s+i.ep,0)-free.length;
+    let k=0;
+    const sorted=[...items].sort((a,b)=>b.ep-a.ep);
+    while(diff>0&&k<1000){
+      const it=sorted[k%sorted.length];
+      if(it.ep>1){it.ep--;diff--;}
+      k++;
+    }
+  }
+  // Przypisz gniazda po kolei
+  let si=0;
+  items.forEach(item=>{
+    item.slots=[];item.gniazdo=null;
+    const n=parseInt(item.ep)||0;
+    if(n>0&&si<free.length){
+      const take=Math.min(n,free.length-si);
+      item.ep=take;
+      item.gniazdo=free[si];
+      item.slots=free.slice(si,si+take);
+      si+=take;
+    }
+  });
+  assigned=true;selectedId=null;render();
+}
+
+function formatEp(item){
+  const assigned=parseInt(item.ep)||0;
+  const max=parseInt(item.maxEp)||assigned;
+  if(max>assigned) return `${assigned}/${max}`;
+  return String(assigned);
+}
+
+function generateExportHTML(){
+  const assignedItems=items.filter(i=>i.gniazdo);
+  const noSlot=items.filter(i=>!i.gniazdo&&!i.slots?.length);
+  let html='';
+  assignedItems.forEach(i=>{
+    const epStr=formatEp(i);
+    const isFull=!(parseInt(i.maxEp)>parseInt(i.ep));
+    html+=`<div class="exp-item">
+      <div class="exp-head">
+        <span class="exp-gn">${i.gniazdo||''}</span>
+        <span class="exp-art">Art. ${i.art}</span>
+        <span class="exp-ep${isFull?' full':''}">EP ${epStr}</span>
+        ${i.zrodlo?`<span class="exp-zr">Źródło: ${i.zrodlo}</span>`:''}
+      </div>
+      <div class="exp-name">${i.name}</div>
+    </div>`;
+  });
+  if(noSlot.length>0){
+    html+=`<div class="exp-noslot-title">⚠ BEZ GNIAZDA</div>`;
+    noSlot.forEach(i=>{
+      const epStr=formatEp(i);
+      html+=`<div class="exp-item">
+        <div class="exp-head">
+          <span class="exp-art">Art. ${i.art}</span>
+          <span class="exp-ep">EP ${epStr}</span>
+          ${i.zrodlo?`<span class="exp-zr">Źródło: ${i.zrodlo}</span>`:''}
+        </div>
+        <div class="exp-name">${i.name}</div>
+      </div>`;
+    });
+  }
+  return html;
+}
+
+function generateExportText(){
+  const assignedItems=items.filter(i=>i.gniazdo);
+  const noSlot=items.filter(i=>!i.gniazdo&&!i.slots?.length);
+  const lines=[];
+  assignedItems.forEach((i,idx)=>{
+    const epStr=formatEp(i);
+    let head=`${i.gniazdo}  |  Art. ${i.art}  |  EP ${epStr}`;
+    if(i.zrodlo) head+=`  |  Źródło: ${i.zrodlo}`;
+    lines.push(head);
+    lines.push(i.name);
+    if(idx<assignedItems.length-1) lines.push('');
+  });
+  if(noSlot.length>0){
+    lines.push('');
+    lines.push('--- BEZ GNIAZDA ---');
+    noSlot.forEach((i,idx)=>{
+      const epStr=formatEp(i);
+      let head=`Art. ${i.art}  |  EP ${epStr}`;
+      if(i.zrodlo) head+=`  |  Źródło: ${i.zrodlo}`;
+      lines.push(head);
+      lines.push(i.name);
+      if(idx<noSlot.length-1) lines.push('');
+    });
+  }
+  return lines.join('\n');
+}
+
+function toggleExport(){
+  const sec=document.getElementById('export-section');
+  if(sec.classList.contains('show')){sec.classList.remove('show');}
+  else{document.getElementById('export-text').innerHTML=generateExportHTML();sec.classList.add('show');sec.scrollIntoView({behavior:'smooth'});}
+}
+
+function copyExport(){
+  const plain=generateExportText();
+  const html=`<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;line-height:1.5;color:#e0e0e0;background:#111;padding:8px">`+generateExportHTML()+`</div>`;
+  const btn=document.getElementById('btn-copy-exp');
+  function showOk(){btn.textContent='✓ Skopiowano';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Kopiuj';btn.classList.remove('copied');},2000);}
+  if(navigator.clipboard&&window.isSecureContext&&navigator.clipboard.write){
+    const item=new ClipboardItem({
+      'text/plain': new Blob([plain],{type:'text/plain'}),
+      'text/html': new Blob([html],{type:'text/html'})
+    });
+    navigator.clipboard.write([item]).then(showOk).catch(()=>{
+      navigator.clipboard.writeText(plain).then(showOk).catch(()=>fallbackCopy(plain,showOk));
+    });
+  }else if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(plain).then(showOk).catch(()=>fallbackCopy(plain,showOk));
+  }else{
+    fallbackCopy(plain,showOk);
+  }
+}
+function fallbackCopy(text,cb){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';ta.style.top='0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');cb();}catch(e){alert('Zaznacz tekst ręcznie i skopiuj (Ctrl+C)');}
+  document.body.removeChild(ta);
+}
+
+function render(){
+  const content=document.getElementById('main-content');const stats=document.getElementById('stats');const warn=document.getElementById('warn-bar');
+  const swapBar=document.getElementById('swap-mode-bar');const hint=document.getElementById('hint-bar');
+  const btnExport=document.getElementById('btn-export');const exportSec=document.getElementById('export-section');
+  const free=freeSlots();const aSlots=assigned?items.reduce((s,i)=>s+(i.slots?i.slots.length:0),0):0;
+  if(items.length===0){stats.style.display='none';warn.classList.remove('show');swapBar.classList.remove('show');hint.classList.remove('show');
+    btnExport.style.display='none';exportSec.classList.remove('show');
+    content.innerHTML='<div class="empty">Wgraj listę i kliknij "▶ Przypisz"</div>';updateLockGrid();updateCounter();return;}
+  stats.style.display='flex';swapBar.classList.toggle('show',selectedId!==null&&!assigned);hint.classList.toggle('show',!assigned&&items.length>1&&selectedId===null);
+  btnExport.style.display=assigned?'':'none';
+  const noSlot=items.filter(i=>!i.gniazdo&&assigned);
+  document.getElementById('st-art').textContent=items.length;document.getElementById('st-ep').textContent=items.reduce((s,i)=>s+(parseInt(i.ep)||0),0);
+  document.getElementById('st-free').textContent=assigned?free.length-aSlots:free.length;document.getElementById('st-used').textContent=assigned?aSlots:'—';
+  if(assigned&&noSlot.length>0){warn.textContent='⚠ '+noSlot.length+' artykuł(ów) nie zmieściło się';warn.classList.add('show');}else warn.classList.remove('show');
+  content.innerHTML='<div class="art-list" id="art-list"></div>';const list=document.getElementById('art-list');
+  items.forEach(item=>{
+    const hasSlot=item.gniazdo&&assigned;const isSel=selectedId===item.id;const isTgt=selectedId!==null&&selectedId!==item.id&&!assigned;
+    const card=document.createElement('div');
+    card.className='art-card'+(assigned?(hasSlot?' assigned':' no-slot'):'')+(isSel?' swap-selected':isTgt?' swap-target':'');
+    card.innerHTML=`<div class="art-top" onclick="handleCardTap(${item.id})">
+      <div class="art-nr${isSel?' selected':''}">${item.nr}${isSel?' 🔵':''}</div>
+      <div class="art-info"><div class="art-name">${item.name}</div><div class="art-code">Art. ${item.art}${item.zrodlo?' · Źródło: '+item.zrodlo:''}${item.maxEp?' · max '+item.maxEp+' EP':''}</div></div>
+      <div class="art-right" onclick="event.stopPropagation()">
+        <input class="ep-input" type="number" min="1" max="44" value="${item.ep||1}" onchange="updateEp(${item.id},this.value)" onclick="this.select()">
+        <div class="ep-label">EP</div>
+        <button class="btn-del-art" onclick="deleteItem(${item.id})">✕</button>
+      </div></div>
+      ${assigned?`<div class="art-bottom">${hasSlot?`<div class="gn-badge">📍 ${item.gniazdo}</div><div class="slots-badge">${item.slots.length>1?'+'+(item.slots.length-1)+' gniazd':'tylko to'}</div>`:`<div class="no-slot-badge">⚠ Brak gniazda</div>`}${item.zrodlo?`<div class="slots-badge">Źródło: ${item.zrodlo}</div>`:''}</div>`:''}`;
+    list.appendChild(card);});
+  updateLockGrid();updateCounter();
+}
+
+function updateEp(id,val){const v=parseInt(val);const item=items.find(i=>i.id===id);if(item){saveHistory();item.ep=isNaN(v)||v<1?1:v;item.maxEp=item.ep;}if(assigned)assignAll();else render();}
+function toggleLocks(){document.getElementById('lock-section').classList.toggle('open');}
+function updateLockGrid(){
+  const grid=document.getElementById('lock-grid');grid.innerHTML='';
+  ALL_SLOTS.forEach(slot=>{const div=document.createElement('div');div.className='lock-btn'+(blocked.includes(slot)?' locked':'');
+    div.textContent=blocked.includes(slot)?'🔒 '+slot:slot;
+    div.onclick=()=>{blocked=blocked.includes(slot)?blocked.filter(s=>s!==slot):[...blocked,slot];saveBlocked();if(assigned)assignAll();else{render();updateLockGrid();}};grid.appendChild(div);});
+}
+function clearAll(){saveHistory();items=[];assigned=false;selectedId=null;document.getElementById('export-section').classList.remove('show');render();}
+updateLockGrid();render();
+
+// Reaguj na obrót telefonu
+window.addEventListener('orientationchange', ()=>{ setTimeout(()=>{ render(); if(document.getElementById('export-section').classList.contains('show')){ document.getElementById('export-text').innerHTML=generateExportHTML(); } }, 150); });
+window.addEventListener('resize', ()=>{ /* layout CSS-owy i tak się dostosuje */ });
+</script>
+</body>
+</html>
